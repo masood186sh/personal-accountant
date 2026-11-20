@@ -1,11 +1,20 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>حسابدار من | مدیریت هزینه‌های شخصی</title>
-  
-  <!-- فونت وزیرمتن برای نمایش زیبا و استاندارد متون فارسی -->
+
+  <!-- تنظیمات PWA و نصب روی موبایل -->
+  <meta name="theme-color" content="#4f46e5" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="حسابدار من" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%234f46e5'/%3E%3Ccircle cx='256' cy='256' r='140' fill='none' stroke='%23ffffff' stroke-width='32'/%3E%3Cpath d='M256 156v200M296 196c0-22-18-36-40-36s-40 14-40 36 18 32 40 38 40 16 40 38-18 36-40 36-40-14-40-36' fill='none' stroke='%23ffffff' stroke-width='30' stroke-linecap='round'/%3E%3C/svg%3E" />
+
+  <!-- فونت وزیرمتن -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -42,7 +51,6 @@
       font-family: 'Vazirmatn', sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
-    /* اسکرول‌بار سفارشی */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -77,13 +85,10 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <!-- دکمه تغییر حالت تاریک / روشن -->
         <button id="themeToggle" type="button" aria-label="تغییر تم" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors">
-          <!-- آیکون خورشید (نمایش در حالت تاریک) -->
           <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 hidden dark:block text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
-          <!-- آیکون ماه (نمایش در حالت روشن) -->
           <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 block dark:hidden text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
           </svg>
@@ -167,7 +172,7 @@
         <form id="transactionForm" class="space-y-4">
           <input type="hidden" id="editId" value="" />
 
-          <!-- انتخاب نوع تراکنش (هزینه / درآمد) -->
+          <!-- انتخاب نوع تراکنش -->
           <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
             <label class="cursor-pointer">
               <input type="radio" name="type" value="expense" class="peer sr-only" checked />
@@ -237,7 +242,6 @@
 
         <div class="relative flex-1 min-h-[260px] flex items-center justify-center">
           <canvas id="expenseChart"></canvas>
-          <!-- پیام عدم وجود داده برای نمودار -->
           <div id="emptyChartState" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center p-4">
             <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -262,7 +266,6 @@
 
         <!-- نوار فیلتر و جستجو -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full sm:w-auto">
-          <!-- جستجو بر اساس یادداشت -->
           <div class="relative">
             <input type="text" id="searchInput" placeholder="جستجو در یادداشت..."
               class="w-full sm:w-48 pl-3 pr-9 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500" />
@@ -271,13 +274,11 @@
             </svg>
           </div>
 
-          <!-- فیلتر ماه -->
           <select id="filterMonth"
             class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
             <option value="all">همه ماه‌ها</option>
           </select>
 
-          <!-- فیلتر دسته‌بندی -->
           <select id="filterCategory"
             class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
             <option value="all">همه دسته‌بندی‌ها</option>
@@ -286,9 +287,7 @@
       </div>
 
       <!-- لیست تراکنش‌ها -->
-      <div id="transactionList" class="divide-y divide-slate-100 dark:divide-slate-800">
-        <!-- آیتم‌ها با جاوااسکریپت رندر می‌شوند -->
-      </div>
+      <div id="transactionList" class="divide-y divide-slate-100 dark:divide-slate-800"></div>
 
       <!-- حالت خالی بودن لیست -->
       <div id="emptyListState" class="hidden py-12 text-center">
@@ -309,9 +308,15 @@
   </footer>
 
   <script>
-    // ==========================================
-    // ۱. تنظیمات اولیه، دسته‌بندی‌ها و رنگ‌ها
-    // ==========================================
+    // ثبت Service Worker برای فعال‌سازی نصب (PWA) و پشتیبانی آفلاین
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch((err) => {
+          console.error('Service Worker registration failed:', err);
+        });
+      });
+    }
+
     const CATEGORIES = {
       expense: [
         { id: 'food', label: 'خوراک و رستوران', color: '#f43f5e' },
@@ -343,7 +348,6 @@
     let transactions = [];
     let expenseChartInstance = null;
 
-    // المان‌های DOM
     const form = document.getElementById('transactionForm');
     const editIdInput = document.getElementById('editId');
     const typeRadios = document.querySelectorAll('input[name="type"]');
@@ -371,9 +375,6 @@
     const emptyChartState = document.getElementById('emptyChartState');
     const themeToggleBtn = document.getElementById('themeToggle');
 
-    // ==========================================
-    // ۲. توابع کمکی (اعداد فارسی و تاریخ شمسی)
-    // ==========================================
     function toPersianDigits(num) {
       const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
       return String(num).replace(/\d/g, (x) => persianDigits[x]);
@@ -420,9 +421,6 @@
       return new Date(now - offset).toISOString().split('T')[0];
     }
 
-    // ==========================================
-    // ۳. مدیریت تم (حالت تاریک / روشن)
-    // ==========================================
     function initTheme() {
       const savedTheme = localStorage.getItem(THEME_KEY);
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -439,9 +437,6 @@
       updateChart();
     });
 
-    // ==========================================
-    // ۴. مدیریت داده‌ها در LocalStorage
-    // ==========================================
     function loadTransactions() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
@@ -456,9 +451,6 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
     }
 
-    // ==========================================
-    // ۵. مقداردهی منوهای دسته‌بندی و ماه‌ها
-    // ==========================================
     function populateFormCategories(type, selectedCatId = null) {
       const list = CATEGORIES[type] || CATEGORIES.expense;
       categorySelect.innerHTML = list
@@ -511,9 +503,6 @@
       }
     }
 
-    // ==========================================
-    // ۶. محاسبه آمار و رندر لیست تراکنش‌ها
-    // ==========================================
     function updateSummaryCards() {
       let income = 0;
       let expense = 0;
@@ -621,9 +610,6 @@
       return div.innerHTML;
     }
 
-    // ==========================================
-    // ۷. نمودار ماهانه بر اساس دسته‌بندی (Chart.js)
-    // ==========================================
     function updateChart() {
       const selectedMonth = filterMonthSelect.value;
       const targetMonth = selectedMonth === 'all' ? getTodayISO().slice(0, 7) : selectedMonth;
@@ -728,9 +714,6 @@
       });
     }
 
-    // ==========================================
-    // ۸. عملیات افزودن، ویرایش و حذف
-    // ==========================================
     function refreshUI() {
       saveTransactions();
       populateFilterMonths();
@@ -828,14 +811,12 @@
       refreshUI();
     };
 
-    // تغییر دسته‌بندی‌های فرم با تغییر نوع تراکنش (درآمد/هزینه)
     typeRadios.forEach(radio => {
       radio.addEventListener('change', (e) => {
         populateFormCategories(e.target.value);
       });
     });
 
-    // رویدادهای فیلتر و جستجو
     searchInput.addEventListener('input', renderTransactionList);
     filterCategorySelect.addEventListener('change', renderTransactionList);
     filterMonthSelect.addEventListener('change', () => {
@@ -843,9 +824,6 @@
       updateChart();
     });
 
-    // ==========================================
-    // ۹. راه‌اندازی اولیه برنامه
-    // ==========================================
     function initApp() {
       initTheme();
       loadTransactions();
@@ -862,5 +840,3 @@
   </script>
 </body>
 </html>
-
-
