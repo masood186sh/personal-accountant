@@ -1,0 +1,866 @@
+﻿<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>حسابدار من | مدیریت هزینه‌های شخصی</title>
+  
+  <!-- فونت وزیرمتن برای نمایش زیبا و استاندارد متون فارسی -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Vazirmatn', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: 'Vazirmatn', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* اسکرول‌بار سفارشی */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .dark ::-webkit-scrollbar-thumb {
+      background: #475569;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-300 min-h-screen flex flex-col">
+
+  <!-- هدر برنامه -->
+  <header class="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center shadow-lg shadow-brand-500/30">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight">حسابدار من</h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400">مدیریت هوشمند دخل و خرج</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <!-- دکمه تغییر حالت تاریک / روشن -->
+        <button id="themeToggle" type="button" aria-label="تغییر تم" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors">
+          <!-- آیکون خورشید (نمایش در حالت تاریک) -->
+          <svg id="sunIcon" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 hidden dark:block text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <!-- آیکون ماه (نمایش در حالت روشن) -->
+          <svg id="moonIcon" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 block dark:hidden text-slate-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- محتوای اصلی -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+    <!-- کارت‌های خلاصه وضعیت مالی -->
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <!-- موجودی کل -->
+      <div class="bg-gradient-to-br from-brand-600 to-indigo-700 text-white rounded-2xl p-5 shadow-lg shadow-brand-500/20 relative overflow-hidden">
+        <div class="relative z-10">
+          <div class="flex items-center justify-between opacity-90 text-sm mb-2">
+            <span>موجودی کل</span>
+            <span class="p-1.5 bg-white/15 rounded-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
+            </span>
+          </div>
+          <div class="flex items-baseline gap-1.5">
+            <span id="totalBalance" class="text-2xl sm:text-3xl font-extrabold tracking-tight" dir="ltr">۰</span>
+            <span class="text-xs opacity-80">تومان</span>
+          </div>
+        </div>
+        <div class="absolute -bottom-6 -left-6 w-28 h-28 bg-white/10 rounded-full blur-xl"></div>
+      </div>
+
+      <!-- مجموع درآمد -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-sm mb-2">
+          <span>کل درآمدها</span>
+          <span class="p-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 11l5-5m0 0l5 5m-5-5v12" />
+            </svg>
+          </span>
+        </div>
+        <div class="flex items-baseline gap-1.5 text-emerald-600 dark:text-emerald-400">
+          <span id="totalIncome" class="text-2xl sm:text-3xl font-bold" dir="ltr">۰</span>
+          <span class="text-xs text-slate-500 dark:text-slate-400">تومان</span>
+        </div>
+      </div>
+
+      <!-- مجموع هزینه -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-sm mb-2">
+          <span>کل هزینه‌ها</span>
+          <span class="p-1.5 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 13l-5 5m0 0l-5-5m5 5V6" />
+            </svg>
+          </span>
+        </div>
+        <div class="flex items-baseline gap-1.5 text-rose-600 dark:text-rose-400">
+          <span id="totalExpense" class="text-2xl sm:text-3xl font-bold" dir="ltr">۰</span>
+          <span class="text-xs text-slate-500 dark:text-slate-400">تومان</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- بخش فرم ثبت تراکنش و نمودار دسته‌بندی -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- فرم افزودن / ویرایش تراکنش -->
+      <div class="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm h-fit">
+        <div class="flex items-center justify-between mb-5">
+          <h2 id="formTitle" class="text-base font-bold flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-brand-600"></span>
+            ثبت تراکنش جدید
+          </h2>
+          <button id="cancelEditBtn" type="button" class="hidden text-xs text-rose-600 dark:text-rose-400 hover:underline font-medium">
+            انصراف از ویرایش
+          </button>
+        </div>
+
+        <form id="transactionForm" class="space-y-4">
+          <input type="hidden" id="editId" value="" />
+
+          <!-- انتخاب نوع تراکنش (هزینه / درآمد) -->
+          <div class="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+            <label class="cursor-pointer">
+              <input type="radio" name="type" value="expense" class="peer sr-only" checked />
+              <div class="text-center py-2 text-sm font-semibold rounded-lg text-slate-600 dark:text-slate-400 peer-checked:bg-white dark:peer-checked:bg-slate-900 peer-checked:text-rose-600 dark:peer-checked:text-rose-400 peer-checked:shadow-sm transition-all">
+                هزینه (برداشت)
+              </div>
+            </label>
+            <label class="cursor-pointer">
+              <input type="radio" name="type" value="income" class="peer sr-only" />
+              <div class="text-center py-2 text-sm font-semibold rounded-lg text-slate-600 dark:text-slate-400 peer-checked:bg-white dark:peer-checked:bg-slate-900 peer-checked:text-emerald-600 dark:peer-checked:text-emerald-400 peer-checked:shadow-sm transition-all">
+                درآمد (واریز)
+              </div>
+            </label>
+          </div>
+
+          <!-- مبلغ -->
+          <div>
+            <label for="amount" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">مبلغ (تومان)</label>
+            <input type="number" id="amount" required min="1" step="any" placeholder="مثلاً: ۲۵۰۰۰۰"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm transition-all" />
+          </div>
+
+          <!-- دسته‌بندی و تاریخ -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label for="category" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">دسته‌بندی</label>
+              <select id="category" required
+                class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm transition-all">
+              </select>
+            </div>
+            <div>
+              <label for="date" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">تاریخ</label>
+              <input type="date" id="date" required
+                class="w-full px-3 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm transition-all" />
+            </div>
+          </div>
+
+          <!-- یادداشت -->
+          <div>
+            <label for="note" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1.5">توضیحات / یادداشت</label>
+            <input type="text" id="note" required placeholder="مثلاً: خرید میوه و سبزیجات"
+              class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500 text-sm transition-all" />
+          </div>
+
+          <!-- دکمه ثبت -->
+          <button type="submit" id="submitBtn"
+            class="w-full py-3 px-4 rounded-xl bg-brand-600 hover:bg-brand-700 active:scale-[0.99] text-white font-semibold text-sm shadow-md shadow-brand-500/25 transition-all flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            <span id="submitBtnText">افزودن تراکنش</span>
+          </button>
+        </form>
+      </div>
+
+      <!-- نمودار هزینه‌های ماهانه بر اساس دسته‌بندی -->
+      <div class="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <div>
+            <h2 class="text-base font-bold">نمودار هزینه‌ها بر اساس دسته‌بندی</h2>
+            <p id="chartSubtitle" class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">نمایش سهم هر دسته‌بندی در ماه انتخاب‌شده</p>
+          </div>
+          <span id="chartMonthTotal" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+            مجموع هزینه ماه: ۰ تومان
+          </span>
+        </div>
+
+        <div class="relative flex-1 min-h-[260px] flex items-center justify-center">
+          <canvas id="expenseChart"></canvas>
+          <!-- پیام عدم وجود داده برای نمودار -->
+          <div id="emptyChartState" class="hidden absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+            <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+              </svg>
+            </div>
+            <p class="text-sm font-medium text-slate-600 dark:text-slate-400">هزینه‌ای برای این ماه ثبت نشده است</p>
+            <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">با ثبت اولین هزینه، نمودار به‌صورت خودکار رسم می‌شود.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- بخش فیلترها و لیست تراکنش‌ها -->
+    <section class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h2 class="text-base font-bold flex items-center gap-2">
+          تاریخچه تراکنش‌ها
+          <span id="transactionCount" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400">۰</span>
+        </h2>
+
+        <!-- نوار فیلتر و جستجو -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full sm:w-auto">
+          <!-- جستجو بر اساس یادداشت -->
+          <div class="relative">
+            <input type="text" id="searchInput" placeholder="جستجو در یادداشت..."
+              class="w-full sm:w-48 pl-3 pr-9 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500" />
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-400 absolute right-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+
+          <!-- فیلتر ماه -->
+          <select id="filterMonth"
+            class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+            <option value="all">همه ماه‌ها</option>
+          </select>
+
+          <!-- فیلتر دسته‌بندی -->
+          <select id="filterCategory"
+            class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500">
+            <option value="all">همه دسته‌بندی‌ها</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- لیست تراکنش‌ها -->
+      <div id="transactionList" class="divide-y divide-slate-100 dark:divide-slate-800">
+        <!-- آیتم‌ها با جاوااسکریپت رندر می‌شوند -->
+      </div>
+
+      <!-- حالت خالی بودن لیست -->
+      <div id="emptyListState" class="hidden py-12 text-center">
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-3">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+        </div>
+        <p class="text-sm font-medium text-slate-600 dark:text-slate-300">تراکنشی یافت نشد</p>
+        <p class="text-xs text-slate-400 mt-1">فیلترها را تغییر دهید یا یک تراکنش جدید اضافه کنید.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="max-w-6xl w-full mx-auto px-4 sm:px-6 py-4 text-center text-xs text-slate-400 dark:text-slate-500">
+    اطلاعات شما به‌صورت خودکار در حافظه مرورگر (LocalStorage) ذخیره می‌شود.
+  </footer>
+
+  <script>
+    // ==========================================
+    // ۱. تنظیمات اولیه، دسته‌بندی‌ها و رنگ‌ها
+    // ==========================================
+    const CATEGORIES = {
+      expense: [
+        { id: 'food', label: 'خوراک و رستوران', color: '#f43f5e' },
+        { id: 'transport', label: 'حمل و نقل', color: '#f97316' },
+        { id: 'housing', label: 'مسکن و قبوض', color: '#8b5cf6' },
+        { id: 'shopping', label: 'خرید و پوشاک', color: '#ec4899' },
+        { id: 'health', label: 'سلامت و درمان', color: '#14b8a6' },
+        { id: 'entertainment', label: 'تفریح و سرگرمی', color: '#eab308' },
+        { id: 'education', label: 'آموزش و کتاب', color: '#3b82f6' },
+        { id: 'other_expense', label: 'سایر هزینه‌ها', color: '#64748b' }
+      ],
+      income: [
+        { id: 'salary', label: 'حقوق و دستمزد', color: '#10b981' },
+        { id: 'freelance', label: 'پروژه و فریلنسری', color: '#06b6d4' },
+        { id: 'investment', label: 'سود و سرمایه‌گذاری', color: '#6366f1' },
+        { id: 'gift', label: 'هدیه و پاداش', color: '#84cc16' },
+        { id: 'other_income', label: 'سایر درآمدها', color: '#22c55e' }
+      ]
+    };
+
+    const ALL_CATEGORIES_MAP = [...CATEGORIES.expense, ...CATEGORIES.income].reduce((acc, item) => {
+      acc[item.id] = item;
+      return acc;
+    }, {});
+
+    const STORAGE_KEY = 'persian_expense_tracker_v1';
+    const THEME_KEY = 'persian_expense_tracker_theme';
+
+    let transactions = [];
+    let expenseChartInstance = null;
+
+    // المان‌های DOM
+    const form = document.getElementById('transactionForm');
+    const editIdInput = document.getElementById('editId');
+    const typeRadios = document.querySelectorAll('input[name="type"]');
+    const amountInput = document.getElementById('amount');
+    const categorySelect = document.getElementById('category');
+    const dateInput = document.getElementById('date');
+    const noteInput = document.getElementById('note');
+    const submitBtnText = document.getElementById('submitBtnText');
+    const formTitle = document.getElementById('formTitle');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+
+    const totalBalanceEl = document.getElementById('totalBalance');
+    const totalIncomeEl = document.getElementById('totalIncome');
+    const totalExpenseEl = document.getElementById('totalExpense');
+
+    const searchInput = document.getElementById('searchInput');
+    const filterMonthSelect = document.getElementById('filterMonth');
+    const filterCategorySelect = document.getElementById('filterCategory');
+    const transactionListEl = document.getElementById('transactionList');
+    const transactionCountEl = document.getElementById('transactionCount');
+    const emptyListState = document.getElementById('emptyListState');
+
+    const chartMonthTotalEl = document.getElementById('chartMonthTotal');
+    const chartSubtitleEl = document.getElementById('chartSubtitle');
+    const emptyChartState = document.getElementById('emptyChartState');
+    const themeToggleBtn = document.getElementById('themeToggle');
+
+    // ==========================================
+    // ۲. توابع کمکی (اعداد فارسی و تاریخ شمسی)
+    // ==========================================
+    function toPersianDigits(num) {
+      const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+      return String(num).replace(/\d/g, (x) => persianDigits[x]);
+    }
+
+    function formatCurrency(amount) {
+      const isNegative = amount < 0;
+      const absFormatted = Math.abs(Math.round(amount)).toLocaleString('en-US');
+      const persianNum = toPersianDigits(absFormatted);
+      return isNegative ? `${persianNum}-` : persianNum;
+    }
+
+    function formatPersianDate(isoDateStr) {
+      if (!isoDateStr) return '';
+      try {
+        const date = new Date(isoDateStr + 'T00:00:00');
+        return new Intl.DateTimeFormat('fa-IR', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }).format(date);
+      } catch {
+        return toPersianDigits(isoDateStr);
+      }
+    }
+
+    function getPersianMonthLabel(yyyyMm) {
+      if (!yyyyMm || yyyyMm === 'all') return 'همه ماه‌ها';
+      try {
+        const [year, month] = yyyyMm.split('-');
+        const date = new Date(Number(year), Number(month) - 1, 15);
+        return new Intl.DateTimeFormat('fa-IR', {
+          year: 'numeric',
+          month: 'long'
+        }).format(date);
+      } catch {
+        return toPersianDigits(yyyyMm);
+      }
+    }
+
+    function getTodayISO() {
+      const now = new Date();
+      const offset = now.getTimezoneOffset() * 60000;
+      return new Date(now - offset).toISOString().split('T')[0];
+    }
+
+    // ==========================================
+    // ۳. مدیریت تم (حالت تاریک / روشن)
+    // ==========================================
+    function initTheme() {
+      const savedTheme = localStorage.getItem(THEME_KEY);
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem(THEME_KEY, isDark ? 'dark' : 'light');
+      updateChart();
+    });
+
+    // ==========================================
+    // ۴. مدیریت داده‌ها در LocalStorage
+    // ==========================================
+    function loadTransactions() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        transactions = raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        console.error('خطا در خواندن اطلاعات:', e);
+        transactions = [];
+      }
+    }
+
+    function saveTransactions() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+    }
+
+    // ==========================================
+    // ۵. مقداردهی منوهای دسته‌بندی و ماه‌ها
+    // ==========================================
+    function populateFormCategories(type, selectedCatId = null) {
+      const list = CATEGORIES[type] || CATEGORIES.expense;
+      categorySelect.innerHTML = list
+        .map(cat => `<option value="${cat.id}">${cat.label}</option>`)
+        .join('');
+      if (selectedCatId && list.some(c => c.id === selectedCatId)) {
+        categorySelect.value = selectedCatId;
+      }
+    }
+
+    function populateFilterCategories() {
+      const currentVal = filterCategorySelect.value;
+      let html = `<option value="all">همه دسته‌بندی‌ها</option>`;
+      html += `<optgroup label="هزینه‌ها">`;
+      CATEGORIES.expense.forEach(c => {
+        html += `<option value="${c.id}">${c.label}</option>`;
+      });
+      html += `</optgroup><optgroup label="درآمدها">`;
+      CATEGORIES.income.forEach(c => {
+        html += `<option value="${c.id}">${c.label}</option>`;
+      });
+      html += `</optgroup>`;
+      filterCategorySelect.innerHTML = html;
+      filterCategorySelect.value = currentVal || 'all';
+    }
+
+    function populateFilterMonths() {
+      const currentVal = filterMonthSelect.value;
+      const monthSet = new Set();
+      const currentMonth = getTodayISO().slice(0, 7);
+      monthSet.add(currentMonth);
+
+      transactions.forEach(t => {
+        if (t.date && t.date.length >= 7) {
+          monthSet.add(t.date.slice(0, 7));
+        }
+      });
+
+      const sortedMonths = Array.from(monthSet).sort((a, b) => b.localeCompare(a));
+      let html = `<option value="all">همه ماه‌ها</option>`;
+      sortedMonths.forEach(m => {
+        html += `<option value="${m}">${getPersianMonthLabel(m)}</option>`;
+      });
+
+      filterMonthSelect.innerHTML = html;
+      if (currentVal && (currentVal === 'all' || monthSet.has(currentVal))) {
+        filterMonthSelect.value = currentVal;
+      } else {
+        filterMonthSelect.value = currentMonth;
+      }
+    }
+
+    // ==========================================
+    // ۶. محاسبه آمار و رندر لیست تراکنش‌ها
+    // ==========================================
+    function updateSummaryCards() {
+      let income = 0;
+      let expense = 0;
+
+      transactions.forEach(t => {
+        const val = Number(t.amount) || 0;
+        if (t.type === 'income') income += val;
+        else expense += val;
+      });
+
+      const balance = income - expense;
+      totalBalanceEl.textContent = formatCurrency(balance);
+      totalIncomeEl.textContent = formatCurrency(income);
+      totalExpenseEl.textContent = formatCurrency(expense);
+    }
+
+    function getFilteredTransactions() {
+      const searchTerm = searchInput.value.trim().toLowerCase();
+      const selectedMonth = filterMonthSelect.value;
+      const selectedCategory = filterCategorySelect.value;
+
+      return transactions
+        .filter(t => {
+          const matchesMonth = selectedMonth === 'all' || (t.date && t.date.startsWith(selectedMonth));
+          const matchesCategory = selectedCategory === 'all' || t.category === selectedCategory;
+          const matchesSearch = !searchTerm || (t.note && t.note.toLowerCase().includes(searchTerm));
+          return matchesMonth && matchesCategory && matchesSearch;
+        })
+        .sort((a, b) => {
+          const dateDiff = b.date.localeCompare(a.date);
+          return dateDiff !== 0 ? dateDiff : b.createdAt - a.createdAt;
+        });
+    }
+
+    function renderTransactionList() {
+      const filtered = getFilteredTransactions();
+      transactionCountEl.textContent = toPersianDigits(filtered.length);
+
+      if (filtered.length === 0) {
+        transactionListEl.innerHTML = '';
+        emptyListState.classList.remove('hidden');
+        return;
+      }
+
+      emptyListState.classList.add('hidden');
+      transactionListEl.innerHTML = filtered.map(t => {
+        const cat = ALL_CATEGORIES_MAP[t.category] || { label: 'نامشخص', color: '#64748b' };
+        const isIncome = t.type === 'income';
+        const sign = isIncome ? '+' : '-';
+        const amountColor = isIncome
+          ? 'text-emerald-600 dark:text-emerald-400'
+          : 'text-rose-600 dark:text-rose-400';
+
+        return `
+          <div class="py-3.5 flex items-center justify-between gap-3 group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 px-2 rounded-xl transition-colors">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-white font-bold text-sm shadow-sm"
+                   style="background-color: ${cat.color}">
+                ${cat.label.charAt(0)}
+              </div>
+              <div class="min-w-0">
+                <p class="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">${escapeHTML(t.note)}</p>
+                <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  <span class="inline-flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full" style="background-color: ${cat.color}"></span>
+                    ${cat.label}
+                  </span>
+                  <span>•</span>
+                  <span>${formatPersianDate(t.date)}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3 shrink-0">
+              <div class="text-left">
+                <span class="text-sm sm:text-base font-bold ${amountColor}" dir="ltr">
+                  ${sign} ${formatCurrency(t.amount)}
+                </span>
+                <span class="block text-[10px] text-slate-400">تومان</span>
+              </div>
+
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="startEditTransaction('${t.id}')" title="ویرایش"
+                  class="p-2 rounded-lg text-slate-400 hover:text-brand-600 hover:bg-brand-50 dark:hover:bg-brand-500/10 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </button>
+                <button type="button" onclick="deleteTransaction('${t.id}')" title="حذف"
+                  class="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function escapeHTML(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // ==========================================
+    // ۷. نمودار ماهانه بر اساس دسته‌بندی (Chart.js)
+    // ==========================================
+    function updateChart() {
+      const selectedMonth = filterMonthSelect.value;
+      const targetMonth = selectedMonth === 'all' ? getTodayISO().slice(0, 7) : selectedMonth;
+
+      chartSubtitleEl.textContent = `تفکیک هزینه‌های ${getPersianMonthLabel(targetMonth)}`;
+
+      const monthlyExpenses = transactions.filter(
+        t => t.type === 'expense' && t.date && t.date.startsWith(targetMonth)
+      );
+
+      const categoryTotals = {};
+      let totalMonthExpense = 0;
+
+      monthlyExpenses.forEach(t => {
+        const amt = Number(t.amount) || 0;
+        categoryTotals[t.category] = (categoryTotals[t.category] || 0) + amt;
+        totalMonthExpense += amt;
+      });
+
+      chartMonthTotalEl.textContent = `مجموع هزینه ماه: ${formatCurrency(totalMonthExpense)} تومان`;
+
+      const labels = [];
+      const dataValues = [];
+      const bgColors = [];
+
+      Object.entries(categoryTotals)
+        .sort((a, b) => b[1] - a[1])
+        .forEach(([catId, total]) => {
+          const catInfo = ALL_CATEGORIES_MAP[catId] || { label: 'سایر', color: '#64748b' };
+          labels.push(catInfo.label);
+          dataValues.push(total);
+          bgColors.push(catInfo.color);
+        });
+
+      const canvas = document.getElementById('expenseChart');
+      if (dataValues.length === 0) {
+        canvas.classList.add('hidden');
+        emptyChartState.classList.remove('hidden');
+        if (expenseChartInstance) {
+          expenseChartInstance.destroy();
+          expenseChartInstance = null;
+        }
+        return;
+      }
+
+      canvas.classList.remove('hidden');
+      emptyChartState.classList.add('hidden');
+
+      const isDark = document.documentElement.classList.contains('dark');
+      const textColor = isDark ? '#cbd5e1' : '#334155';
+      const borderColor = isDark ? '#0f172a' : '#ffffff';
+
+      if (expenseChartInstance) {
+        expenseChartInstance.destroy();
+      }
+
+      expenseChartInstance = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+          labels,
+          datasets: [{
+            data: dataValues,
+            backgroundColor: bgColors,
+            borderColor: borderColor,
+            borderWidth: 3,
+            hoverOffset: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '64%',
+          plugins: {
+            legend: {
+              position: 'right',
+              rtl: true,
+              labels: {
+                color: textColor,
+                font: {
+                  family: 'Vazirmatn',
+                  size: 12
+                },
+                padding: 14,
+                usePointStyle: true,
+                pointStyle: 'circle'
+              }
+            },
+            tooltip: {
+              rtl: true,
+              titleFont: { family: 'Vazirmatn', size: 13 },
+              bodyFont: { family: 'Vazirmatn', size: 12 },
+              callbacks: {
+                label: function(context) {
+                  const val = context.raw || 0;
+                  const percent = totalMonthExpense > 0 ? Math.round((val / totalMonthExpense) * 100) : 0;
+                  return ` ${formatCurrency(val)} تومان (${toPersianDigits(percent)}٪)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // ==========================================
+    // ۸. عملیات افزودن، ویرایش و حذف
+    // ==========================================
+    function refreshUI() {
+      saveTransactions();
+      populateFilterMonths();
+      updateSummaryCards();
+      renderTransactionList();
+      updateChart();
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const type = document.querySelector('input[name="type"]:checked').value;
+      const amount = parseFloat(amountInput.value);
+      const category = categorySelect.value;
+      const date = dateInput.value;
+      const note = noteInput.value.trim();
+
+      if (!amount || amount <= 0 || !date || !note) return;
+
+      const editId = editIdInput.value;
+
+      if (editId) {
+        const index = transactions.findIndex(t => t.id === editId);
+        if (index !== -1) {
+          transactions[index] = {
+            ...transactions[index],
+            type,
+            amount,
+            category,
+            date,
+            note
+          };
+        }
+        resetFormState();
+      } else {
+        const newTransaction = {
+          id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          type,
+          amount,
+          category,
+          date,
+          note,
+          createdAt: Date.now()
+        };
+        transactions.push(newTransaction);
+        form.reset();
+        dateInput.value = getTodayISO();
+        document.querySelector('input[name="type"][value="expense"]').checked = true;
+        populateFormCategories('expense');
+      }
+
+      refreshUI();
+    });
+
+    window.startEditTransaction = function(id) {
+      const item = transactions.find(t => t.id === id);
+      if (!item) return;
+
+      editIdInput.value = item.id;
+      const radio = document.querySelector(`input[name="type"][value="${item.type}"]`);
+      if (radio) radio.checked = true;
+
+      populateFormCategories(item.type, item.category);
+      amountInput.value = item.amount;
+      dateInput.value = item.date;
+      noteInput.value = item.note;
+
+      formTitle.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span> ویرایش تراکنش`;
+      submitBtnText.textContent = 'ذخیره تغییرات';
+      cancelEditBtn.classList.remove('hidden');
+
+      form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    };
+
+    function resetFormState() {
+      editIdInput.value = '';
+      form.reset();
+      dateInput.value = getTodayISO();
+      document.querySelector('input[name="type"][value="expense"]').checked = true;
+      populateFormCategories('expense');
+
+      formTitle.innerHTML = `<span class="w-2 h-2 rounded-full bg-brand-600"></span> ثبت تراکنش جدید`;
+      submitBtnText.textContent = 'افزودن تراکنش';
+      cancelEditBtn.classList.add('hidden');
+    }
+
+    cancelEditBtn.addEventListener('click', resetFormState);
+
+    window.deleteTransaction = function(id) {
+      if (!confirm('آیا از حذف این تراکنش مطمئن هستید؟')) return;
+      transactions = transactions.filter(t => t.id !== id);
+      if (editIdInput.value === id) {
+        resetFormState();
+      }
+      refreshUI();
+    };
+
+    // تغییر دسته‌بندی‌های فرم با تغییر نوع تراکنش (درآمد/هزینه)
+    typeRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => {
+        populateFormCategories(e.target.value);
+      });
+    });
+
+    // رویدادهای فیلتر و جستجو
+    searchInput.addEventListener('input', renderTransactionList);
+    filterCategorySelect.addEventListener('change', renderTransactionList);
+    filterMonthSelect.addEventListener('change', () => {
+      renderTransactionList();
+      updateChart();
+    });
+
+    // ==========================================
+    // ۹. راه‌اندازی اولیه برنامه
+    // ==========================================
+    function initApp() {
+      initTheme();
+      loadTransactions();
+      dateInput.value = getTodayISO();
+      populateFormCategories('expense');
+      populateFilterCategories();
+      populateFilterMonths();
+      updateSummaryCards();
+      renderTransactionList();
+      updateChart();
+    }
+
+    initApp();
+  </script>
+</body>
+</html>
+
+
