@@ -1,0 +1,27 @@
+{
+  "name": "حسابدار من | مدیریت هزینه‌های شخصی",
+  "short_name": "حسابدار من",
+  "description": "اپلیکیشن مدیریت هوشمند درآمد و هزینه‌های شخصی",
+  "start_url": "/personal-accountant/",
+  "scope": "/personal-accountant/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "dir": "rtl",
+  "lang": "fa",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%234f46e5'/%3E%3Ccircle cx='256' cy='256' r='140' fill='none' stroke='%23ffffff' stroke-width='32'/%3E%3Cpath d='M256 156v200M296 196c0-22-18-36-40-36s-40 14-40 36 18 32 40 38 40 16 40 38-18 36-40 36-40-14-40-36' fill='none' stroke='%23ffffff' stroke-width='30' stroke-linecap='round'/%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%234f46e5'/%3E%3Ccircle cx='256' cy='256' r='140' fill='none' stroke='%23ffffff' stroke-width='32'/%3E%3Cpath d='M256 156v200M296 196c0-22-18-36-40-36s-40 14-40 36 18 32 40 38 40 16 40 38-18 36-40 36-40-14-40-36' fill='none' stroke='%23ffffff' stroke-width='30' stroke-linecap='round'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
